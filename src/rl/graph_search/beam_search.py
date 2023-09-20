@@ -166,7 +166,7 @@ def beam_search(pn, e_s, q, e_t, kg, num_steps, beam_size, return_path_component
             ops.rearrange_vector_list(log_action_probs, action_offset)
             log_action_probs.append(log_action_prob)
         pn.update_path(action, kg, offset=action_offset)
-        seen_nodes = torch.cat([seen_nodes[action_offset], action[1].unsqueeze(1)], dim=1)
+        seen_nodes = torch.cat([seen_nodes[action_offset.int()], action[1].unsqueeze(1)], dim=1)
         if kg.args.save_beam_search_paths:
             adjust_search_trace(search_trace, action_offset)
             search_trace.append(action)

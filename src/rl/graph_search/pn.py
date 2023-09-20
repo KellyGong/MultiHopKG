@@ -119,7 +119,6 @@ class GraphSearchPolicy(nn.Module):
 
         if use_action_space_bucketing:
             """
-            
             """
             db_outcomes = []
             entropy_list = []
@@ -173,10 +172,10 @@ class GraphSearchPolicy(nn.Module):
         def offset_path_history(p, offset):
             for i, x in enumerate(p):
                 if type(x) is tuple:
-                    new_tuple = tuple([_x[:, offset, :] for _x in x])
+                    new_tuple = tuple([_x[:, offset.int(), :] for _x in x])
                     p[i] = new_tuple
                 else:
-                    p[i] = x[offset, :]
+                    p[i] = x[offset.int(), :]
 
         # update action history
         if self.relation_only_in_path:
