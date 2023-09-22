@@ -404,7 +404,7 @@ def run_ablation_studies(args):
             dev_data, pred_scores, lf.kg.dev_objects, seen_queries, verbose=True)
         mrrs[system] = {'': mrr * 100}
         to_m_mrrs[system] = {'': to_m_mrr * 100}
-        to_1_mrrs[system] = {'': to_1_mrr  * 100}
+        to_1_mrrs[system] = {'': to_1_mrr * 100}
         seen_mrrs[system] = {'': seen_mrr * 100}
         unseen_mrrs[system] = {'': unseen_mrr * 100}
         _, _, _, _, mrr_full_kg = src.eval.hits_and_ranks(dev_data, pred_scores, lf.kg.all_objects, verbose=True)

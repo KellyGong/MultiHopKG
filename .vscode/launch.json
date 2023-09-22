@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "experiments.py",
             "console": "integratedTerminal",
-            "env": {"CUDA_VISIBLE_DEVICES":"1"}, 
+            "env": {"CUDA_VISIBLE_DEVICES":"5"}, 
             "args": [
                 "--train",
                 "--data_dir", "data/WN18RR",

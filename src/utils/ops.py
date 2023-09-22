@@ -142,6 +142,7 @@ def rearrange_vector_list(l, offset):
     for i, v in enumerate(l):
         l[i] = v[offset]
 
+
 def safe_log(x):
     return torch.log(x + EPSILON)
 
