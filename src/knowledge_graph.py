@@ -84,7 +84,7 @@ class KnowledgeGraph(nn.Module):
         print('Sanity check: {} relations loaded'.format(len(self.relation2id)))
        
         # Load graph structures
-        if self.args.model.startswith('point'): 
+        if self.args.model.startswith('point') or self.args.model == 'pg_llm': 
             # Base graph structure used for training and test
             adj_list_path = os.path.join(data_dir, 'adj_list.pkl')
             with open(adj_list_path, 'rb') as f:

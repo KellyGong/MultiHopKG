@@ -78,6 +78,7 @@ def get_train_path(args):
 
     return train_path
 
+
 def load_seen_entities(adj_list_path, entity_index_path):
     _, id2entity = load_index(entity_index_path)
     with open(adj_list_path, 'rb') as f:
@@ -90,7 +91,8 @@ def load_seen_entities(adj_list_path, entity_index_path):
                 seen_entities.add(id2entity[e2])
     print('{} seen entities loaded...'.format(len(seen_entities)))
     return seen_entities
- 
+
+
 def load_triples_with_label(data_path, r, entity_index_path, relation_index_path, seen_entities=None, verbose=False):
     entity2id, _ = load_index(entity_index_path)
     relation2id, _ = load_index(relation_index_path)
@@ -112,6 +114,7 @@ def load_triples_with_label(data_path, r, entity_index_path, relation_index_path
             triples.append(triple2ids(e1, e2, r))
             labels.append(label.strip())
     return triples, labels
+
 
 def load_triples(data_path, entity_index_path, relation_index_path, group_examples_by_query=False,
                  add_reverse_relations=False, seen_entities=None, verbose=False):
@@ -161,8 +164,11 @@ def load_triples(data_path, entity_index_path, relation_index_path, group_exampl
         for e1_id in triple_dict:
             for r_id in triple_dict[e1_id]:
                 triples.append((e1_id, list(triple_dict[e1_id][r_id]), r_id))
+    e_id2entity = {v: k for k, v in entity2id.items()}
+    r_id2relation = {v: k for k, v in relation2id.items()}
     print('{} triples loaded from {}'.format(len(triples), data_path))
-    return triples
+    return triples, e_id2entity, r_id2relation
+
 
 def load_entity_hist(input_path):
     entity_hist = {}

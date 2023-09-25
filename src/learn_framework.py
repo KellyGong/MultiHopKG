@@ -63,7 +63,7 @@ class LFramework(nn.Module):
         print('--------------------------')
         print()
 
-    def run_train(self, train_data, dev_data):
+    def run_train(self, train_data, dev_data, eid2entity, rid2relation):
         self.print_all_model_parameters()
 
         if self.optim is None:
@@ -105,7 +105,7 @@ class LFramework(nn.Module):
                 mini_batch = train_data[example_id:example_id + self.batch_size]
                 if len(mini_batch) < self.batch_size:
                     continue
-                loss = self.loss(mini_batch)
+                loss = self.loss(mini_batch, eid2entity, rid2relation)
                 loss['model_loss'].backward()
                 if self.grad_norm > 0:
                     clip_grad_norm_(self.parameters(), self.grad_norm)

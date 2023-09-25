@@ -10,11 +10,11 @@
             "request": "launch",
             "program": "experiments.py",
             "console": "integratedTerminal",
-            "env": {"CUDA_VISIBLE_DEVICES":"5"}, 
+            "env": {"CUDA_VISIBLE_DEVICES":"0"}, 
             "args": [
                 "--train",
                 "--data_dir", "data/WN18RR",
-                "--model", "point",
+                "--model", "pg_llm",
                 "--use_action_space_bucketing", 
                 "--bandwidth", "500",
                 "--entity_dim", "200",
