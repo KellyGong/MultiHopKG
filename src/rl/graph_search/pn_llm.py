@@ -46,7 +46,20 @@ class GraphSearchPolicyLLM(nn.Module):
         self.fn = None
         self.fn_kg = None
 
-    def transit(self, e, obs, kg, use_action_space_bucketing=True, merge_aspace_batching_outcome=False):
+    def llm_guide(self, e, obs, kg, eid2entity, rid2relation, llm, action_space_b):
+        """
+        Compute the next action based on large language model output given
+            (a) the current node (entity) in KG and the query relation
+            (b) action history
+            (c) next entity prediction from the large language model
+        the parameters are the same as transit
+        action_space_b: ((relation_space_batch, entity_space_batch), action_mask_batch)
+        """
+        e_s, q, e_t, last_step, last_r, seen_nodes = obs
+        llm.kg_next_entity(e_s, e, q, action_space_b, eid2entity, rid2relation)
+        pass
+
+    def transit(self, e, obs, kg, eid2entity, rid2relation, llm, use_action_space_bucketing=True, merge_aspace_batching_outcome=False):
         """
         Compute the next action distribution based on
             (a) the current node (entity) in KG and the query relation
@@ -64,6 +77,9 @@ class GraphSearchPolicyLLM(nn.Module):
             into buckets by their sizes.
         :param merge_aspace_batch_outcome: If set, merge the transition probability distribution
             generated of different action space bucket into a single batch.
+        :param eid2entity: mapping from entity id to entity name
+        :param rid2relation: mapping from relation id to relation name
+        :param llm: language model
         :return
             With aspace batching and without merging the outcomes:
                 db_outcomes: (Dynamic Batch) (action_space, action_dist)
@@ -98,6 +114,7 @@ class GraphSearchPolicyLLM(nn.Module):
         X2 = self.W2Dropout(X)
 
         def policy_nn_fun(X2, action_space):
+            # relation_space, entity_space
             (r_space, e_space), action_mask = action_space
             A = self.get_action_embedding((r_space, e_space), kg)
             action_dist = F.softmax(
@@ -126,6 +143,7 @@ class GraphSearchPolicyLLM(nn.Module):
             db_action_spaces, db_references = self.get_action_space_in_buckets(e, obs, kg)
             for action_space_b, reference_b in zip(db_action_spaces, db_references):
                 X2_b = X2[reference_b, :]
+                self.llm_guide(e, obs, kg, eid2entity, rid2relation, llm, action_space_b)
                 action_dist_b, entropy_b = policy_nn_fun(X2_b, action_space_b)
                 references.extend(reference_b)
                 db_outcomes.append((action_space_b, action_dist_b))

@@ -13,7 +13,7 @@
             "env": {"CUDA_VISIBLE_DEVICES":"0"}, 
             "args": [
                 "--train",
-                "--data_dir", "data/WN18RR",
+                "--data_dir", "data/NELL-995",
                 "--model", "pg_llm",
                 "--use_action_space_bucketing", 
                 "--bandwidth", "500",

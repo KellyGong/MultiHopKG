@@ -13,6 +13,7 @@ from src.learn_framework import LFramework
 import src.rl.graph_search.beam_search as search
 import src.utils.ops as ops
 from src.utils.ops import int_fill_var_cuda, var_cuda, zeros_var_cuda
+from src.rl.graph_search.llm_baichuan import LargeLM
 
 
 class PolicyGradientLLM(LFramework):
@@ -37,6 +38,9 @@ class PolicyGradientLLM(LFramework):
         # Analysis
         self.path_types = dict()
         self.num_path_types = 0
+
+        # Large language model
+        self.llm = LargeLM(args)
 
     def reward_fun(self, e1, r, e2, pred_e2):
         return (pred_e2 == e2).float()
@@ -137,7 +141,8 @@ class PolicyGradientLLM(LFramework):
             last_r, e = path_trace[-1]
             obs = [e_s, q, e_t, t==(num_steps-1), last_r, seen_nodes]
             db_outcomes, inv_offset, policy_entropy = pn.transit(
-                e, obs, kg, use_action_space_bucketing=self.use_action_space_bucketing)
+                e, obs, kg, eid2entity, rid2relation, self.llm,
+                use_action_space_bucketing=self.use_action_space_bucketing)
             sample_outcome = self.sample_action(db_outcomes, inv_offset)
             action = sample_outcome['action_sample']
             pn.update_path(action, kg)
