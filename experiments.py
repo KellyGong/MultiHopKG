@@ -28,6 +28,8 @@ from src.emb.fact_network import get_conve_kg_state_dict, get_complex_kg_state_d
 from src.emb.emb import EmbeddingBasedMethod
 from src.rl.graph_search.pn import GraphSearchPolicy
 from src.rl.graph_search.pg import PolicyGradient
+from src.rl.graph_search.pn_llm import GraphSearchPolicyLLM
+from src.rl.graph_search.pg_llm import PolicyGradientLLM
 from src.rl.graph_search.rs_pg import RewardShapingPolicyGradient
 from src.utils.ops import flatten
 
@@ -72,7 +74,7 @@ def initialize_model_directory(args, random_seed=None):
             args.bandwidth,
             args.beta
         )
-    elif args.model.startswith('point'):
+    elif args.model.startswith('point') or args.model == 'pg_llm':
         if args.baseline == 'avg_reward':
             print('* Policy Gradient Baseline: average reward')
         elif args.baseline == 'avg_reward_normalized':
@@ -187,6 +189,9 @@ def construct_model(args):
     if args.model in ['point', 'point.gc']:
         pn = GraphSearchPolicy(args)
         lf = PolicyGradient(args, kg, pn)
+    elif args.model == 'pg_llm':
+        pn = GraphSearchPolicyLLM(args)
+        lf = PolicyGradientLLM(args, kg, pn)
     elif args.model.startswith('point.rs'):
         pn = GraphSearchPolicy(args)
         fn_model = args.model.split('.')[2]
@@ -221,7 +226,7 @@ def train(lf):
     dev_path = os.path.join(args.data_dir, 'dev.triples')
     entity_index_path = os.path.join(args.data_dir, 'entity2id.txt')
     relation_index_path = os.path.join(args.data_dir, 'relation2id.txt')
-    train_data = data_utils.load_triples(
+    train_data, eid2entity, rid2relation = data_utils.load_triples(
         train_path, entity_index_path, relation_index_path, group_examples_by_query=args.group_examples_by_query,
         add_reverse_relations=args.add_reversed_training_edges)
     if 'NELL' in args.data_dir:
@@ -232,7 +237,7 @@ def train(lf):
     dev_data = data_utils.load_triples(dev_path, entity_index_path, relation_index_path, seen_entities=seen_entities)
     if args.checkpoint_path is not None:
         lf.load_checkpoint(args.checkpoint_path)
-    lf.run_train(train_data, dev_data)
+    lf.run_train(train_data, dev_data, eid2entity, rid2relation)
 
 def inference(lf):
     lf.batch_size = args.dev_batch_size
@@ -404,7 +409,7 @@ def run_ablation_studies(args):
             dev_data, pred_scores, lf.kg.dev_objects, seen_queries, verbose=True)
         mrrs[system] = {'': mrr * 100}
         to_m_mrrs[system] = {'': to_m_mrr * 100}
-        to_1_mrrs[system] = {'': to_1_mrr  * 100}
+        to_1_mrrs[system] = {'': to_1_mrr * 100}
         seen_mrrs[system] = {'': seen_mrr * 100}
         unseen_mrrs[system] = {'': unseen_mrr * 100}
         _, _, _, _, mrr_full_kg = src.eval.hits_and_ranks(dev_data, pred_scores, lf.kg.all_objects, verbose=True)
